@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alterar Jogo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Alterar Jogo</h1>
+
+        <form id="editGameForm" class="mt-4">
+            <div class="mb-3">
+                <label for="editTitulo" class="form-label">Título</label>
+                <input type="text" class="form-control" id="editTitulo" required>
+            </div>
+            <div class="mb-3">
+                <label for="editGenero" class="form-label">Gênero</label>
+                <input type="text" class="form-control" id="editGenero" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            <a href="jogos.html" class="btn btn-secondary ml-2">Cancelar</a>
+        </form>
+    </div>
+
+    <script>
+        // Função para carregar os dados do jogo a partir do localStorage
+        function loadGameData(id) {
+            const games = JSON.parse(localStorage.getItem('games')) || [];
+            const gameToEdit = games.find(game => game.id == id);
+
+            if (gameToEdit) {
+                document.getElementById('editTitulo').value = gameToEdit.titulo;
+                document.getElementById('editGenero').value = gameToEdit.genero;
+            }
+        }
+
+        // Recuperar o ID da URL (como ?id=1)
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameId = urlParams.get('id');
+
+        if (gameId) {
+            loadGameData(gameId);
+        }
+
+        document.getElementById('editGameForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const titulo = document.getElementById('editTitulo').value;
+            const genero = document.getElementById('editGenero').value;
+
+            // Atualizar os dados do jogo no localStorage
+            const games = JSON.parse(localStorage.getItem('games')) || [];
+            const gameIndex = games.findIndex(game => game.id == gameId);
+
+            if (gameIndex !== -1) {
+                games[gameIndex].titulo = titulo;
+                games[gameIndex].genero = genero;
+
+                // Atualizar o localStorage com os dados alterados
+                localStorage.setItem('games', JSON.stringify(games));
+
+                // Redireciona para a página de gerenciamento de jogos
+                window.location.href = 'jogos.html'; // Certifique-se de que o caminho esteja correto
+            } else {
+                alert('Jogo não encontrado!');
+            }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

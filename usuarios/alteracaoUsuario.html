@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alterar Usuário</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Alterar Usuário</h1>
+
+        <form id="editUserForm" class="mt-4">
+            <div class="mb-3">
+                <label for="editNome" class="form-label">Nome</label>
+                <input type="text" class="form-control" id="editNome" required>
+            </div>
+            <div class="mb-3">
+                <label for="editEmail" class="form-label">Email</label>
+                <input type="email" class="form-control" id="editEmail" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            <a href="usuario.html" class="btn btn-secondary ml-2">Cancelar</a>
+        </form>
+    </div>
+
+    <script>
+        // Função para carregar os dados do usuário a partir do localStorage
+        function loadUserData(id) {
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const userToEdit = users.find(user => user.id == id);
+
+            if (userToEdit) {
+                document.getElementById('editNome').value = userToEdit.nome;
+                document.getElementById('editEmail').value = userToEdit.email;
+            }
+        }
+
+        // Recuperar o ID da URL (como ?id=1)
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('id');
+
+        if (userId) {
+            loadUserData(userId);
+        }
+
+        document.getElementById('editUserForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const nome = document.getElementById('editNome').value;
+            const email = document.getElementById('editEmail').value;
+
+            // Recuperar os dados do localStorage e atualizar o usuário
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const userIndex = users.findIndex(user => user.id == userId);
+
+            if (userIndex !== -1) {
+                users[userIndex].nome = nome;
+                users[userIndex].email = email;
+
+                // Atualizar o localStorage com os dados alterados
+                localStorage.setItem('users', JSON.stringify(users));
+
+                alert('Usuário atualizado com sucesso!');
+                window.location.href = 'usuario.html'; // Volta para a lista de usuários
+            } else {
+                alert('Usuário não encontrado!');
+            }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
