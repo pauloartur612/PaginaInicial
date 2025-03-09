@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciar Usuários</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/styles/usuario.css">
 </head>
 <body>
     <div class="container mt-5">
         <h1 class="text-center">Gerenciar Usuários</h1>
+
         
         <form id="userForm" class="mt-4">
             <div class="mb-3">
@@ -22,8 +24,24 @@
             <button type="submit" class="btn btn-primary">Cadastrar</button>
         </form>
 
-        <h2 class="mt-5">Lista de Usuários</h2>
-        <table class="table mt-3">
+        <h2 class="mt-5">Pesquisar Usuários</h2>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <label for="searchId" class="form-label">Buscar por ID</label>
+                <input type="text" id="searchId" class="form-control" placeholder="Digite o ID...">
+            </div>
+            <div class="col-md-4">
+                <label for="searchNome" class="form-label">Buscar por Nome</label>
+                <input type="text" id="searchNome" class="form-control" placeholder="Digite o Nome...">
+            </div>
+            <div class="col-md-4">
+                <label for="searchEmail" class="form-label">Buscar por Email</label>
+                <input type="text" id="searchEmail" class="form-control" placeholder="Digite o Email...">
+            </div>
+        </div>
+
+        <table class="table mt-3" id="userTable" style="display: none;">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -33,67 +51,79 @@
                 </tr>
             </thead>
             <tbody id="userTableBody">
-                <!-- Usuários serão listados aqui -->
+                <!-- Os usuários aparecerão aqui -->
             </tbody>
         </table>
     </div>
 
+    <div class="text-center mb-7">
+        <a href="../home.html" class="btn btn-secondary">Voltar para a Tela Inicial</a>
+    </div>
+
     <script>
-        // Função para carregar os usuários armazenados no localStorage
         function loadUsers() {
             const users = JSON.parse(localStorage.getItem('users')) || [];
             const tableBody = document.getElementById('userTableBody');
+            const table = document.getElementById('userTable');
             tableBody.innerHTML = '';
 
-            users.forEach((user, index) => {
-                const row = tableBody.insertRow();
-                row.insertCell(0).textContent = index + 1;
-                row.insertCell(1).textContent = user.nome;
-                row.insertCell(2).textContent = user.email;
+            const searchId = document.getElementById('searchId').value.toLowerCase();
+            const searchNome = document.getElementById('searchNome').value.toLowerCase();
+            const searchEmail = document.getElementById('searchEmail').value.toLowerCase();
 
-                const actionsCell = row.insertCell(3);
-                const editButton = document.createElement('a');
-                editButton.textContent = 'Alterar';
-                editButton.className = 'btn btn-warning btn-sm';
-                editButton.href = 'alteracaoUsuario.html?id=' + user.id;
-                actionsCell.appendChild(editButton);
+            const filteredUsers = users.filter(user => 
+                (searchId === '' || user.id.toString().includes(searchId)) &&
+                (searchNome === '' || user.nome.toLowerCase().includes(searchNome)) &&
+                (searchEmail === '' || user.email.toLowerCase().includes(searchEmail))
+            );
 
-                const deleteButton = document.createElement('button');
-                deleteButton.textContent = 'Excluir';
-                deleteButton.className = 'btn btn-danger btn-sm';
-                deleteButton.onclick = function() {
-                    const updatedUsers = users.filter((u) => u.id !== user.id);
-                    localStorage.setItem('users', JSON.stringify(updatedUsers));
-                    loadUsers(); // Recarregar a lista
-                };
-                actionsCell.appendChild(deleteButton);
-            });
+            if (filteredUsers.length > 0) {
+                table.style.display = 'table';
+                filteredUsers.forEach(user => {
+                    const row = tableBody.insertRow();
+                    row.insertCell(0).textContent = user.id;
+                    row.insertCell(1).textContent = user.nome;
+                    row.insertCell(2).textContent = user.email;
+
+                    const actionsCell = row.insertCell(3);
+                    const editButton = document.createElement('a');
+                    editButton.textContent = 'Alterar';
+                    editButton.className = 'btn btn-warning btn-sm me-2';
+                    editButton.href = 'alteracaoUsuario.html?id=' + user.id;
+                    actionsCell.appendChild(editButton);
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Excluir';
+                    deleteButton.className = 'btn btn-danger btn-sm';
+                    deleteButton.onclick = function() {
+                        const updatedUsers = users.filter((u) => u.id !== user.id);
+                        localStorage.setItem('users', JSON.stringify(updatedUsers));
+                        loadUsers();
+                    };
+                    actionsCell.appendChild(deleteButton);
+                });
+            } else {
+                table.style.display = 'none';
+            }
         }
 
-        // Adicionar usuário
         document.getElementById('userForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const nome = document.getElementById('nome').value;
             const email = document.getElementById('email').value;
             const users = JSON.parse(localStorage.getItem('users')) || [];
+            const userId = users.length ? users[users.length - 1].id + 1 : 1;
 
-            const userId = users.length ? users[users.length - 1].id + 1 : 1; // Gerar ID único
-
-            const newUser = {
-                id: userId,
-                nome: nome,
-                email: email
-            };
-
-            users.push(newUser);
+            users.push({ id: userId, nome: nome, email: email });
             localStorage.setItem('users', JSON.stringify(users));
             document.getElementById('userForm').reset();
-            loadUsers(); // Recarregar a lista
         });
 
-        // Carregar os usuários ao carregar a página
-        window.onload = loadUsers;
+        document.getElementById('searchId').addEventListener('input', loadUsers);
+        document.getElementById('searchNome').addEventListener('input', loadUsers);
+        document.getElementById('searchEmail').addEventListener('input', loadUsers);
     </script>
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
